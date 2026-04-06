@@ -1,0 +1,35 @@
+name: CI - Run API tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run sentiment API tests
+      run: |
+        cd api_sentiment
+        pytest tests/ -v --disable-warnings
+
+    - name: Run LLM API tests (if Ollama available)
+      run: |
+        cd api_llm
+        pytest tests/test_api.py -v --disable-warnings || true
